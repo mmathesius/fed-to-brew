@@ -67,7 +67,7 @@ usage() {
   echo "    Sync package(s) from Fedora dist-git to Brew dist-git." >&2
   echo "    Only syncs from one git commit, does not do entire history." >&2
   echo "    Mandatory: --brew-branch" >&2
-  echo "    Mandatory: --yaml OR --txt OR [package]" >&2
+  echo "    Mandatory: --yaml OR --text OR [package]" >&2
   echo "  --check" >&2
   echo "    Check the status of builds" >&2
   echo "  --build --rebuild" >&2
@@ -321,12 +321,16 @@ sync_distgit() {
   # Push up to brew dist-git
   echo "      [${this_name}] Committing and Uploading to Brew dist-git"
   cd ${WORKDIR}/brew/${this_name}
-  if grep -q SHA512 sources ; then
-    source_list="$(cat sources | awk -F"(" '{print $2}' | awk -F")" '{print $1}' ORS=' ')"
-  elif grep -q ^MD5 sources ; then
-    source_list="$(cat sources | awk -F"(" '{print $2}' | awk -F")" '{print $1}' ORS=' ')"
+  if [ -f sources ] ; then
+    if grep -q SHA512 sources ; then
+      source_list="$(cat sources | awk -F"(" '{print $2}' | awk -F")" '{print $1}' ORS=' ')"
+    elif grep -q ^MD5 sources ; then
+      source_list="$(cat sources | awk -F"(" '{print $2}' | awk -F")" '{print $1}' ORS=' ')"
+    else
+      source_list="$(cat sources | awk '{print $2}' ORS=' ')"
+    fi
   else
-    source_list="$(cat sources | awk '{print $2}' ORS=' ')"
+    source_list=""
   fi
   if [ "${VERBOSE}" == "TRUE" ] ; then
     echo "    [${this_name}] source_list: ${source_list}"
